@@ -7,7 +7,7 @@ import { CategoryIcon, ICON_CHOICES } from '../components/CategoryIcon';
 import { ConfirmDialog, Sheet } from '../components/Sheet';
 import type { PageProps } from './HomePage';
 
-const colors = ['#557967', '#ed8b5f', '#68a4db', '#a387d8', '#d8a44e', '#d880a1', '#54aaa5', '#929993'];
+const colors = ['#7a6a58', '#a5755c', '#7f8a8c', '#a38b77', '#aa9676', '#a58380', '#7f928a', '#969088'];
 
 export function SettingsPage({ categories, settings, refresh, notify }: PageProps) {
   const [nameOpen, setNameOpen] = useState(false);
