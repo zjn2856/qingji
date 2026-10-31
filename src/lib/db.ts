@@ -41,8 +41,9 @@ export async function initDB(): Promise<void> {
   initialized ??= (async () => {
     const db = await getDB();
     const tx = db.transaction(['categories', 'settings'], 'readwrite');
-    if ((await tx.objectStore('categories').count()) === 0) {
-      for (const category of defaultCategories()) await tx.objectStore('categories').put(category);
+    const categories = tx.objectStore('categories');
+    for (const category of defaultCategories()) {
+      if (!(await categories.get(category.id))) await categories.put(category);
     }
     const settings = tx.objectStore('settings');
     for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
@@ -94,7 +95,7 @@ export async function removeCategory(id: string): Promise<'deleted' | 'archived'
   const tx = db.transaction(['categories', 'transactions', 'settings'], 'readwrite');
   const related = await tx.objectStore('transactions').index('categoryId').count(id);
   const last = await tx.objectStore('settings').get('lastExpenseCategory');
-  if (last?.value === id) await tx.objectStore('settings').put({ key: 'lastExpenseCategory', value: 'expense-food' });
+  if (last?.value === id) await tx.objectStore('settings').put({ key: 'lastExpenseCategory', value: 'expense-canteen' });
   if (related > 0) {
     await tx.objectStore('categories').put({ ...category, archived: true });
     await tx.done;

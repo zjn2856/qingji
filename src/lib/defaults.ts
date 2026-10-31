@@ -1,25 +1,30 @@
 import type { Category } from '../types';
 
 const expenseCategories: Array<[string, string, string, string]> = [
-  ['food', '餐饮', 'utensils', '#a5755c'],
-  ['shopping', '购物', 'shopping-bag', '#a38b77'],
-  ['transport', '交通', 'train-front', '#7f8a8c'],
-  ['housing', '住房', 'house', '#8a8070'],
-  ['daily', '日用', 'shopping-basket', '#aa9676'],
-  ['entertainment', '娱乐', 'clapperboard', '#a58380'],
-  ['medical', '医疗', 'heart-pulse', '#a87870'],
-  ['education', '学习', 'book-open', '#7d8992'],
-  ['travel', '旅行', 'plane', '#7f928a'],
-  ['other', '其他', 'ellipsis', '#969088'],
+  ['canteen', '食堂', 'utensils', '#a5755c'],
+  ['dining-out', '外食', 'chef-hat', '#aa7d68'],
+  ['drinks', '饮品', 'cup-soda', '#7d9296'],
+  ['snacks', '零食', 'cookie', '#b08a70'],
+  ['supermarket', '超市便利', 'shopping-cart', '#a38b77'],
+  ['transport', '交通出行', 'train-front', '#7f8a8c'],
+  ['research', '学习科研', 'book-open', '#7d8992'],
+  ['ai', 'AI消费', 'bot', '#8a7f96'],
+  ['digital', '数码网络', 'smartphone', '#7c8b9b'],
+  ['dormitory', '宿舍生活', 'house', '#8a8070'],
+  ['medical', '医疗健康', 'heart-pulse', '#a87870'],
+  ['social', '娱乐社交', 'clapperboard', '#a58380'],
+  ['gifts', '人情往来', 'gift', '#a77e70'],
+  ['other', '其他支出', 'ellipsis', '#969088'],
 ];
 
 const incomeCategories: Array<[string, string, string, string]> = [
-  ['salary', '工资', 'briefcase-business', '#7e8b74'],
-  ['parttime', '兼职', 'clock-3', '#84908a'],
-  ['bonus', '奖金', 'award', '#aa946e'],
-  ['investment', '理财', 'chart-no-axes-combined', '#828b98'],
-  ['redpacket', '红包', 'gift', '#a77e70'],
-  ['other', '其他', 'ellipsis', '#969088'],
+  ['scholarship', '奖助学金', 'award', '#7e8b74'],
+  ['research-grant', '科研补助', 'flask-conical', '#748d82'],
+  ['parttime', '兼职实习', 'briefcase-business', '#84908a'],
+  ['family', '家庭支持', 'hand-heart', '#aa946e'],
+  ['reimbursement', '报销', 'receipt', '#7f928a'],
+  ['investment', '投资理财', 'chart-no-axes-combined', '#828b98'],
+  ['other', '其他收入', 'ellipsis', '#969088'],
 ];
 
 export function defaultCategories(now = new Date().toISOString()): Category[] {

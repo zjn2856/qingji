@@ -2,21 +2,21 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { addTransaction, createBackup, deleteTransaction, getCategories, getSettings, getTransactions, removeCategory, resetDBForTests, restoreBackup, saveCategory, updateTransaction } from './db';
 import type { Category, TransactionDraft } from '../types';
 
-const draft: TransactionDraft = { type: 'expense', amountMinor: 1234, categoryId: 'expense-food', date: '2026-01-02', note: '午餐' };
+const draft: TransactionDraft = { type: 'expense', amountMinor: 1234, categoryId: 'expense-canteen', date: '2026-01-02', note: '午餐' };
 
 beforeEach(async () => { await resetDBForTests(); });
 
 describe('IndexedDB 账本', () => {
   it('初始化空数据库与默认分类', async () => {
     expect(await getTransactions()).toEqual([]);
-    expect(await getCategories()).toHaveLength(16);
+    expect(await getCategories()).toHaveLength(21);
     expect((await getSettings()).currency).toBe('CNY');
   });
   it('新增收入和支出并持久化读取', async () => {
     await addTransaction(draft);
-    await addTransaction({ ...draft, type: 'income', categoryId: 'income-salary', amountMinor: 500000 });
+    await addTransaction({ ...draft, type: 'income', categoryId: 'income-scholarship', amountMinor: 500000 });
     expect(await getTransactions()).toHaveLength(2);
-    expect((await getSettings()).lastExpenseCategory).toBe('expense-food');
+    expect((await getSettings()).lastExpenseCategory).toBe('expense-canteen');
   });
   it('编辑与删除真实账单', async () => {
     const item = await addTransaction(draft);

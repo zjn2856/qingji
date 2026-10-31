@@ -47,7 +47,7 @@ export interface TransactionDraft {
 export const DEFAULT_SETTINGS: Settings = {
   ledgerName: '我的账本',
   currency: 'CNY',
-  lastExpenseCategory: 'expense-food',
+  lastExpenseCategory: 'expense-canteen',
 };
 
 export const CURRENCIES = [
