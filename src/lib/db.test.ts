@@ -9,7 +9,9 @@ beforeEach(async () => { await resetDBForTests(); });
 describe('IndexedDB 账本', () => {
   it('初始化空数据库与默认分类', async () => {
     expect(await getTransactions()).toEqual([]);
-    expect(await getCategories()).toHaveLength(21);
+    const categories = await getCategories();
+    expect(categories).toHaveLength(17);
+    expect(categories.filter((item) => item.type === 'expense' && !item.archived)).toHaveLength(10);
     expect((await getSettings()).currency).toBe('CNY');
   });
   it('新增收入和支出并持久化读取', async () => {
@@ -31,6 +33,43 @@ describe('IndexedDB 账本', () => {
     await addTransaction({ ...draft, categoryId: 'custom' });
     expect(await removeCategory('custom')).toBe('archived');
     expect(await getTransactions()).toHaveLength(1);
+  });
+  it('合并旧分类账单并保留其他字段', async () => {
+    const backup = await createBackup();
+    const now = new Date().toISOString();
+    const merges = [
+      ['expense-drinks', 'expense-drinks-snacks'],
+      ['expense-snacks', 'expense-drinks-snacks'],
+      ['expense-supermarket', 'expense-daily-life'],
+      ['expense-digital', 'expense-daily-life'],
+      ['expense-dormitory', 'expense-daily-life'],
+      ['expense-social', 'expense-leisure-social'],
+      ['expense-gifts', 'expense-leisure-social'],
+    ] as const;
+    const legacyCategories: Category[] = merges.map(([id]) => ({
+      id, name: id, type: 'expense', icon: 'ellipsis', color: '#969088', isDefault: true, archived: false, createdAt: now,
+    }));
+    const legacyTransactions = merges.map(([categoryId], index) => ({
+      ...draft, id: `legacy-${index}`, categoryId, amountMinor: 1000 + index, note: `旧账单 ${index}`, createdAt: now, updatedAt: now,
+    }));
+    await restoreBackup({
+      ...backup,
+      settings: { ...backup.settings, lastExpenseCategory: 'expense-snacks' },
+      categories: [...backup.categories, ...legacyCategories],
+      transactions: legacyTransactions,
+    });
+    const migrated = await getTransactions();
+    expect(migrated).toHaveLength(merges.length);
+    merges.forEach(([, newId], index) => {
+      expect(migrated.find((item) => item.id === `legacy-${index}`)).toEqual({ ...legacyTransactions[index], categoryId: newId });
+    });
+    const categories = await getCategories();
+    expect(categories.filter((item) => item.type === 'expense' && !item.archived)).toHaveLength(10);
+    for (const [oldId, newId] of merges) {
+      expect(categories.find((item) => item.id === oldId)?.archived).toBe(true);
+      expect(categories.find((item) => item.id === newId)?.archived).toBe(false);
+    }
+    expect((await getSettings()).lastExpenseCategory).toBe('expense-drinks-snacks');
   });
   it('导出与覆盖恢复完整数据', async () => {
     await addTransaction(draft);

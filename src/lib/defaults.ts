@@ -3,17 +3,13 @@ import type { Category } from '../types';
 const expenseCategories: Array<[string, string, string, string]> = [
   ['canteen', '食堂', 'utensils', '#a5755c'],
   ['dining-out', '外食', 'chef-hat', '#aa7d68'],
-  ['drinks', '饮品', 'cup-soda', '#7d9296'],
-  ['snacks', '零食', 'cookie', '#b08a70'],
-  ['supermarket', '超市便利', 'shopping-cart', '#a38b77'],
+  ['drinks-snacks', '饮品零食', 'cup-soda', '#7d9296'],
+  ['daily-life', '日常生活', 'shopping-cart', '#a38b77'],
   ['transport', '交通出行', 'train-front', '#7f8a8c'],
   ['research', '学习科研', 'book-open', '#7d8992'],
   ['ai', 'AI消费', 'bot', '#8a7f96'],
-  ['digital', '数码网络', 'smartphone', '#7c8b9b'],
-  ['dormitory', '宿舍生活', 'house', '#8a8070'],
   ['medical', '医疗健康', 'heart-pulse', '#a87870'],
-  ['social', '娱乐社交', 'clapperboard', '#a58380'],
-  ['gifts', '人情往来', 'gift', '#a77e70'],
+  ['leisure-social', '休闲人情', 'clapperboard', '#a58380'],
   ['other', '其他支出', 'ellipsis', '#969088'],
 ];
 

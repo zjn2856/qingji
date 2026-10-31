@@ -1,4 +1,4 @@
-import { openDB, type DBSchema, type IDBPDatabase } from 'idb';
+import { openDB, type DBSchema, type IDBPDatabase, type IDBPTransaction } from 'idb';
 import { defaultCategories } from './defaults';
 import { isValidDate } from './date';
 import { MAX_AMOUNT_MINOR } from './money';
@@ -21,6 +21,30 @@ interface LedgerDB extends DBSchema {
 let database: Promise<IDBPDatabase<LedgerDB>> | undefined;
 let initialized: Promise<void> | undefined;
 
+const CATEGORY_MERGES = {
+  'expense-drinks': 'expense-drinks-snacks',
+  'expense-snacks': 'expense-drinks-snacks',
+  'expense-supermarket': 'expense-daily-life',
+  'expense-digital': 'expense-daily-life',
+  'expense-dormitory': 'expense-daily-life',
+  'expense-social': 'expense-leisure-social',
+  'expense-gifts': 'expense-leisure-social',
+} as const;
+
+async function mergeLegacyCategories(tx: IDBPTransaction<LedgerDB, ('transactions' | 'categories' | 'settings')[], 'readwrite'>): Promise<void> {
+  const transactions = tx.objectStore('transactions');
+  const categories = tx.objectStore('categories');
+  const settings = tx.objectStore('settings');
+  const last = await settings.get('lastExpenseCategory');
+  for (const [oldId, newId] of Object.entries(CATEGORY_MERGES)) {
+    const related = await transactions.index('categoryId').getAll(oldId);
+    for (const item of related) await transactions.put({ ...item, categoryId: newId });
+    const oldCategory = await categories.get(oldId);
+    if (oldCategory) await categories.put({ ...oldCategory, archived: true });
+    if (last?.value === oldId) await settings.put({ key: 'lastExpenseCategory', value: newId });
+  }
+}
+
 function getDB() {
   database ??= openDB<LedgerDB>('qingji-ledger', 1, {
     upgrade(db) {
@@ -40,7 +64,7 @@ function getDB() {
 export async function initDB(): Promise<void> {
   initialized ??= (async () => {
     const db = await getDB();
-    const tx = db.transaction(['categories', 'settings'], 'readwrite');
+    const tx = db.transaction(['transactions', 'categories', 'settings'], 'readwrite');
     const categories = tx.objectStore('categories');
     for (const category of defaultCategories()) {
       if (!(await categories.get(category.id))) await categories.put(category);
@@ -49,6 +73,7 @@ export async function initDB(): Promise<void> {
     for (const [key, value] of Object.entries(DEFAULT_SETTINGS)) {
       if (!(await settings.get(key))) await settings.put({ key, value });
     }
+    await mergeLegacyCategories(tx);
     await tx.done;
   })();
   return initialized;
@@ -168,6 +193,10 @@ export async function restoreBackup(data: BackupData): Promise<void> {
     for (const item of data.transactions) await tx.objectStore('transactions').put(item);
     for (const item of data.categories) await tx.objectStore('categories').put(item);
     for (const [key, value] of Object.entries(data.settings)) await tx.objectStore('settings').put({ key, value });
+    for (const category of defaultCategories()) {
+      if (!(await tx.objectStore('categories').get(category.id))) await tx.objectStore('categories').put(category);
+    }
+    await mergeLegacyCategories(tx);
     await tx.done;
   } catch (error) {
     tx.abort();
